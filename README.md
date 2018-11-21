@@ -26,17 +26,15 @@ initData=[74600491, 31718972, 111170161]
 nCase=5
 
 for i in range(nCase):
-    result,cur,ave,counter,total=cache.run(player0,player1,initData)
+    result,cur,ave,counter,total=cache.run((player0,player1),initData)
     print("Case #%d:"%(i))
     print("player0: %s"%(player0))
-    print("player1: %s"%(player0))
+    print("player1: %s"%(player1))
     print("result: ",result.json())
     print("current score: %f"%(cur))
     print("average score: %f"%(ave))
     print("counter: %d"%(counter))
     print("total: %d"%(total))
     print("===================================================================")
-
-
 ```
 
