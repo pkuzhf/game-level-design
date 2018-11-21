@@ -34,11 +34,13 @@ class cache(object):
         return requests.get(self.url,headers=headers)
 
     """
+    player=(player0,player1)
     player0(string) : ID of the first player
     player1(string) : ID of the second player
     initData(list)      : A list with three elements
     """
-    def run(self,player0,player1,initData):
+    def run(self,player,initData):
+        player0,player1=player
         sql="SELECT COUNTER,TOTAL FROM SITUTATION WHERE PLAYER0='%s'\
             AND PLAYER1='%s' AND INITDATA='%s'"\
             %(player0,player1,str(initData))
