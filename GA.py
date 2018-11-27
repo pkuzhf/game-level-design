@@ -1,34 +1,69 @@
 import numpy as np
 import random
 import simulator
+import ThreadClass
 
-
-SIMULATE_PER_CHROMOSOME=1
-
-cache=simulator.cache(lambda *vartuple:1)
-
-players=[
-    '5be824d7877e066ded50b599',
-    '5be66437a421b05c5cfc08db',
-    '5be833ed877e066ded50bce6',
-    '5be65729a421b05c5cfc043c',
-    '5bdd9678e5446d17d00b06e9',
-    '5be66298a421b05c5cfc0841',
-    '5be66151a421b05c5cfc07a3',
-    '5be0532ce5446d17d00ce073']
+SIMULATE_PER_CHROMOSOME=2
 
 '''
-chromosome: 25-bit integer
+chromosome: 22-bit integer
 '''
 def decode(chromosome):
-    return [74600491, 31718972, 111170161]
+    matrix=[[1]*5 for i in range(5)]
+    matrix[0][2]=matrix[0][4]=matrix[1][4]=0
+    for i in range(5):
+        for j in range(5):
+            if matrix[i][j]==1:
+                matrix[i][j]=chromosome&1
+                chromosome>>=1
+    for i in range(5):
+        matrix[i]+=reversed(matrix[i][0:4])
+    for i in range(3,-1,-1):
+        matrix.append(matrix[i])
+    def row2int(a):
+        ret=0
+        for i in range(9): ret+=a[i]<<i
+        return ret
+    ret=[]
+    for i in range(3):
+        tmp=0
+        for j in range(3): tmp+=row2int(matrix[3*i+j])<<(9*j)
+        ret.append(tmp)
+    return ret
+
+def valueFunc(result):
+    len=result.json()[0]['loglength']
+    return max(0,50-abs(len-50))
+
+cache=simulator.cache(valueFunc)
+
+'''
+top 8
+'''
+players=[
+    '5be824d7877e066ded50b599',
+    '5be83afe877e066ded50bf8f',
+    '5be5860b801a7b208e5d2044',
+    '5be66298a421b05c5cfc0841',
+    '5be7dc0e877e066ded509346',
+    '5be65247a421b05c5cfc01a6',
+    '5be5ded3801a7b208e5d541f',
+    '5be65233a421b05c5cfc0198']
 
 def getFitness(chromosome):
     def getAve(player,initData):
-        result,cur,ave,counter,total=cache.run(player,initData)
+        ave,counter,total=cache.run(player,initData)
         return ave
     initData=decode(chromosome)
-    ret=np.mean([getAve(random.sample(players,2),initData)  for i in range(SIMULATE_PER_CHROMOSOME)])
+    ret=0
+    threads=[]
+    for i in range(SIMULATE_PER_CHROMOSOME):
+        task=ThreadClass.MyThread(getAve,(random.sample(players,2),initData))
+        task.start()
+        threads.append(task)
+    for task in threads:
+        ret+=task.get_result()
+    ret/=SIMULATE_PER_CHROMOSOME
     return ret
 
 def selectMatingPool(populations,fitnesses,num_parents):
