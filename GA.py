@@ -3,7 +3,7 @@ import random
 import simulator
 import ThreadClass
 
-SIMULATE_PER_CHROMOSOME=2
+SIMULATE_PER_CHROMOSOME=5
 
 '''
 chromosome: 22-bit integer
@@ -33,7 +33,7 @@ def decode(chromosome):
 
 def valueFunc(result):
     len=result.json()[0]['loglength']
-    return max(0,50-abs(len-50))
+    return max(0,50-len)
 
 cache=simulator.cache(valueFunc)
 
@@ -77,7 +77,7 @@ def crossover(parents,offspring_size,GENE_PER_CHROMOSOME):
     mask2=((1<<GENE_PER_CHROMOSOME)-1)^mask1
     nParents=parents.shape[0]
     mating=lambda a,b:(a&mask1)|(b&mask2)
-    offspring=np.array([mating(parents[k],parents[(k+1)%nParents])
+    offspring=np.array([mating(parents[k%nParents],parents[(k+1)%nParents])
         for k in range(offspring_size)])
     return offspring
 

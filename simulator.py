@@ -1,7 +1,9 @@
 import sqlite3
 import requests
+import json
 
 MAX_SIMULATE=3
+MAX_TURN=60
 
 class cache(object):
 
@@ -9,7 +11,7 @@ class cache(object):
     valueFunc(function) : calculate the value of a given game result
     """
     def __init__(self, valueFunc):
-        self.url="https://www.botzone.org.cn/api/53933a415dcbc5f837707b74/9148008697/admin_runmatch"
+        self.url="http://162.105.98.7:15233/api/53933a415dcbc5f837707b74/9148008697/admin_runmatch"
         self.gameName="Tank"
         self.DATABASE_URI="data/data.db"
         self.valueFunc=valueFunc
@@ -28,15 +30,17 @@ class cache(object):
         'x-game':self.gameName,
         'x-player-0':player0,
         'x-player-1':player1,
-        'x-initData':str({"field":initData})
+        'x-initData':str({"field":initData,"maxTurn":MAX_TURN})
         }
         flag=True
         while flag:
             try:
                 result=requests.get(self.url,headers=headers)
-                result.json()
-            except:
+                result.raise_for_status()
+            except Exception as e:
+                print(e)
                 print(str(headers)+" try again!")
+                print("===============================================")
             else:
                 flag=False
         
